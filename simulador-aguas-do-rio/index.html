@@ -1,195 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Simulador Águas do Rio</title>
-
+    <title>Simulador de Consumo de Água</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
+<main class="container">
+    <header class="page-header">
+        <div class="brand-mark">💧</div>
+        <div>
+            <p class="eyebrow">PROJETO EDUCACIONAL</p>
+            <h1>Simulador de Consumo de Água</h1>
+            <p class="subtitle">Faça uma estimativa de água, esgoto e recursos hídricos.</p>
+        </div>
+    </header>
 
-<div class="container">
+    <div class="content-grid">
+        <section class="card form-card">
+            <div class="section-heading">
+                <span class="section-icon">⚙</span>
+                <div><h2>Dados do imóvel</h2><p>Informe os dados para realizar a simulação.</p></div>
+            </div>
 
-    <h1>💧 Simulador de Conta de Água</h1>
+            <label for="regiao">Região tarifária</label>
+            <select id="regiao">
+                <option value="REGIAO_1">Região 1 — a partir de dezembro de 2025</option>
+                <option value="REGIAO_4">Região 4 — a partir de dezembro de 2025</option>
+            </select>
 
+            <label for="area">Área tarifária</label>
+            <select id="area">
+                <option value="AREA_A">Área A</option>
+                <option value="AREA_B">Área B</option>
+            </select>
 
-    <div class="card">
+            <label for="categoria">Categoria</label>
+            <select id="categoria">
+                <option value="residencial">Residencial</option>
+                <option value="comercial">Comercial</option>
+                <option value="industrial">Industrial</option>
+                <option value="publica">Pública</option>
+                <option value="publica_estadual">Pública Estadual</option>
+            </select>
 
+            <div id="tarifaResidencialField">
+                <label for="tarifaResidencial">Tarifa residencial</label>
+                <select id="tarifaResidencial">
+                    <option value="tarifa2">Tarifa 2</option>
+                    <option value="tarifa1">Tarifa 1</option>
+                    <option value="social">Tarifa social — valor fixo</option>
+                </select>
+            </div>
 
-        <label>Área Tarifária</label>
+            <label for="consumo">Consumo (m³)</label>
+            <input type="number" id="consumo" min="0" step="0.01" inputmode="decimal" value="15">
 
-        <select id="area">
+            <label for="economias">Quantidade de economias</label>
+            <input type="number" id="economias" min="1" step="1" inputmode="numeric" value="1">
 
-            <option value="AREA_A">
-                Área A
-            </option>
+            <label class="checkbox-label"><input type="checkbox" id="esgoto" checked> Possui esgoto</label>
 
-            <option value="AREA_B">
-                Área B
-            </option>
+            <p class="calculation-note">A tarifa social é aplicada por economia. Os percentuais de esgoto e recursos hídricos seguem as premissas configuradas no projeto.</p>
+            <button id="calcularButton" type="button">Calcular simulação <span>→</span></button>
+        </section>
 
-            <option value="AREA_A_DEZ_2025">
-                Área A - Dezembro 2025
-            </option>
+        <section id="resultado" class="resultado">
+            <div class="section-heading">
+                <span class="section-icon">✦</span>
+                <div><h2>Resultado estimado</h2><p>Confira os valores da sua simulação.</p></div>
+            </div>
 
-            <option value="AREA_B_DEZ_2025">
-                Área B - Dezembro 2025
-            </option>
-
-        </select>
-
-
-
-        <label>Categoria</label>
-
-        <select id="categoria">
-
-            <option value="residencial">
-                Residencial
-            </option>
-
-            <option value="comercial">
-                Comercial
-            </option>
-
-            <option value="industrial">
-                Industrial
-            </option>
-
-            <option value="publica">
-                Pública
-            </option>
-
-            <option value="publica_estadual">
-                Pública Estadual
-            </option>
-
-        </select>
-
-
-
-        <label>Consumo (m³)</label>
-
-        <input
-            type="number"
-            id="consumo"
-            min="0"
-            value="15"
-        >
-
-
-
-        <label>Quantidade de Economias</label>
-
-        <input
-            type="number"
-            id="economias"
-            min="1"
-            value="1"
-        />
-
-
-
-        <label>
-
-            <input
-                type="checkbox"
-                id="esgoto"
-                checked
-            >
-
-            Possui Esgoto
-
-        </label>
-
-
-
-        <button onclick="simular()">
-            Calcular
-        </button>
-
-
+            <p><span>Água</span><span id="agua">R$ 0,00</span></p>
+            <p><span>Esgoto</span><span id="valorEsgoto">R$ 0,00</span></p>
+            <p><span>Recursos hídricos</span><span id="rh">R$ 0,00</span></p>
+            <hr>
+            <h3><span>Total estimado</span><span id="total">R$ 0,00</span></h3>
+            <p><span>Economias</span><span id="economiasResultado"></span></p>
+            <p><span>Consumo mínimo</span><span id="consumoMinimo"></span></p>
+            <p><span>Volume faturado</span><span id="volumeFaturado"></span></p>
+        </section>
     </div>
 
-
-
-    <div id="resultado" class="resultado">
-
-
-        <h2>Resultado</h2>
-
-
-        <p>
-            Água:
-            <span id="agua">
-                R$ 0,00
-            </span>
-        </p>
-
-
-        <p>
-            Esgoto:
-            <span id="valorEsgoto">
-                R$ 0,00
-            </span>
-        </p>
-
-
-        <p>
-            Recursos Hídricos:
-            <span id="rh">
-                R$ 0,00
-            </span>
-        </p>
-
-
-        <hr>
-
-
-        <h3>
-            Total:
-            <span id="total">
-                R$ 0,00
-            </span>
-        </h3>
-
-
-
-        <p>
-            Economias:
-            <span id="economiasResultado">
-            </span>
-        </p>
-
-
-
-        <p>
-            Consumo Mínimo:
-            <span id="consumoMinimo">
-            </span>
-        </p>
-
-
-
-        <p>
-            Volume Faturado:
-            <span id="volumeFaturado">
-            </span>
-        </p>
-
-
-    </div>
-
-
-</div>
-
-<!-- Depois executa o cálculo -->
+    <aside class="disclaimer" aria-label="Aviso importante">
+        <strong>Projeto independente de estudo</strong>
+        <p>Esta ferramenta foi desenvolvida exclusivamente para fins educacionais, utilizando dados públicos disponíveis.</p>
+        <p>Não possui vínculo, autorização ou representação de empresa ou órgão público. Os valores exibidos são apenas estimativas e não substituem uma fatura, consulta ou informação oficial.</p>
+    </aside>
+</main>
 <script src="app.js"></script>
-
-
 </body>
-
 </html>
