@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulador Águas do Rio</title>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<div class="container">
+
+    <h1>💧 Simulador de Conta de Água</h1>
+
+
+    <div class="card">
+
+
+        <label>Área Tarifária</label>
+
+        <select id="area">
+
+            <option value="AREA_A">
+                Área A
+            </option>
+
+            <option value="AREA_B">
+                Área B
+            </option>
+
+            <option value="AREA_A_DEZ_2025">
+                Área A - Dezembro 2025
+            </option>
+
+            <option value="AREA_B_DEZ_2025">
+                Área B - Dezembro 2025
+            </option>
+
+        </select>
+
+
+
+        <label>Categoria</label>
+
+        <select id="categoria">
+
+            <option value="residencial">
+                Residencial
+            </option>
+
+            <option value="comercial">
+                Comercial
+            </option>
+
+            <option value="industrial">
+                Industrial
+            </option>
+
+            <option value="publica">
+                Pública
+            </option>
+
+            <option value="publica_estadual">
+                Pública Estadual
+            </option>
+
+        </select>
+
+
+
+        <label>Consumo (m³)</label>
+
+        <input
+            type="number"
+            id="consumo"
+            min="0"
+            value="15"
+        >
+
+
+
+        <label>Quantidade de Economias</label>
+
+        <input
+            type="number"
+            id="economias"
+            min="1"
+            value="1"
+        />
+
+
+
+        <label>
+
+            <input
+                type="checkbox"
+                id="esgoto"
+                checked
+            >
+
+            Possui Esgoto
+
+        </label>
+
+
+
+        <button onclick="simular()">
+            Calcular
+        </button>
+
+
+    </div>
+
+
+
+    <div id="resultado" class="resultado">
+
+
+        <h2>Resultado</h2>
+
+
+        <p>
+            Água:
+            <span id="agua">
+                R$ 0,00
+            </span>
+        </p>
+
+
+        <p>
+            Esgoto:
+            <span id="valorEsgoto">
+                R$ 0,00
+            </span>
+        </p>
+
+
+        <p>
+            Recursos Hídricos:
+            <span id="rh">
+                R$ 0,00
+            </span>
+        </p>
+
+
+        <hr>
+
+
+        <h3>
+            Total:
+            <span id="total">
+                R$ 0,00
+            </span>
+        </h3>
+
+
+
+        <p>
+            Economias:
+            <span id="economiasResultado">
+            </span>
+        </p>
+
+
+
+        <p>
+            Consumo Mínimo:
+            <span id="consumoMinimo">
+            </span>
+        </p>
+
+
+
+        <p>
+            Volume Faturado:
+            <span id="volumeFaturado">
+            </span>
+        </p>
+
+
+    </div>
+
+
+</div>
+
+<!-- Depois executa o cálculo -->
+<script src="app.js"></script>
+
+
+</body>
+
+</html>
