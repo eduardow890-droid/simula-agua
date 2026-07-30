@@ -175,6 +175,7 @@ const BAIRROS_CONCESSAO = BAIRROS_OFICIAIS.map(nome => ({
 }));
 
 const BAIRROS_CONSULTA = BAIRROS_CONCESSAO;
+let areaForcadaPeloBairro = null;
 
 function preencherMunicipios() {
     const select = document.getElementById("municipio");
@@ -220,8 +221,35 @@ function pesquisarBairro() {
             <strong>${item.nome}</strong>
             <span>Bloco da concessão: <b>Águas do Rio - ${item.bloco}</b></span>
             <span>Área tarifária: <b>${item.areaTarifaria ? (item.areaTarifaria === "AREA_A" ? "Área A" : "Área B") : "não informada"}</b></span>
+            <button type="button" onclick="selecionarBairro('${item.nome.replace(/'/g, "\\'")}')">
+                Usar este bairro
+            </button>
         </div>
     `).join("");
+}
+
+function selecionarBairro(nome) {
+    const bairro = BAIRROS_CONCESSAO.find(item => item.nome === nome);
+    if (!bairro) return;
+
+    const regiaoBairro = bairro.bloco === "B1" ? "REGIAO_1" : "REGIAO_4";
+    const municipio = document.getElementById("municipio");
+
+    if (municipio.value && municipio.value !== regiaoBairro) {
+        alert(`O bairro ${bairro.nome} pertence ao bloco ${bairro.bloco}, mas o município selecionado pertence a outro bloco.`);
+        return;
+    }
+
+    document.getElementById("regiao").value = regiaoBairro;
+
+    if (bairro.areaTarifaria) {
+        areaForcadaPeloBairro = bairro.areaTarifaria;
+        document.getElementById("area").value = bairro.areaTarifaria;
+        document.getElementById("areaNota").textContent =
+            `Área definida pelo bairro: ${bairro.areaTarifaria === "AREA_A" ? "Área A" : "Área B"}.`;
+    }
+
+    simular();
 }
 
 function formatarMoeda(valor) {
@@ -249,11 +277,24 @@ function atualizarCampoTarifa() {
 function sincronizarLocalidade() {
     const municipio = document.getElementById("municipio");
     const opcao = municipio.selectedOptions[0];
+    const regiao = document.getElementById("regiao");
+    const area = document.getElementById("area");
+    const nota = document.getElementById("areaNota");
 
-    if (!municipio.value || !opcao) return false;
+    if (!municipio.value || !opcao) {
+        regiao.disabled = false;
+        area.disabled = false;
+        nota.textContent = "Selecione um município para definir automaticamente a área.";
+        return false;
+    }
 
-    document.getElementById("regiao").value = municipio.value;
-    document.getElementById("area").value = opcao.dataset.area;
+    regiao.value = municipio.value;
+    area.value = areaForcadaPeloBairro || opcao.dataset.area;
+    regiao.disabled = true;
+    area.disabled = true;
+    nota.textContent = areaForcadaPeloBairro
+        ? `Área definida pelo bairro: ${area.value === "AREA_A" ? "Área A" : "Área B"}.`
+        : `Área definida automaticamente: ${area.value === "AREA_A" ? "Área A" : "Área B"}.`;
     return true;
 }
 
@@ -313,10 +354,11 @@ function simular({ rolarResultado = false } = {}) {
 document.getElementById("categoria").addEventListener("change", () => { atualizarCampoTarifa(); simular(); });
 document.getElementById("regiao").addEventListener("change", simular);
 document.getElementById("municipio").addEventListener("change", event => {
-    if (event.target.value) simular();
+    areaForcadaPeloBairro = null;
+    sincronizarLocalidade();
+    simular();
 });
 document.getElementById("area").addEventListener("change", () => {
-    sincronizarLocalidade();
     simular();
 });
 document.getElementById("tarifaResidencial").addEventListener("change", simular);
