@@ -57,6 +57,14 @@ const PERCENTUAL_ESGOTO = 1;
 // Ajuste este valor quando o percentual oficial de recursos hídricos for confirmado.
 const PERCENTUAL_RECURSOS_HIDRICOS = 0;
 
+const METADADOS_BASE = {
+    vigenciaTarifas: "dezembro de 2025",
+    fonteConcessao: "CEDAE / Águas do Rio",
+    areaTarifariaInformadaPor: "tabela fornecida pelo usuário",
+    percentualEsgotoConfirmado: false,
+    percentualRecursosHidricosConfirmado: false
+};
+
 const BAIRROS_POR_AREA = {
     AREA_A: [
         "Botafogo", "Lapa", "Coelho Neto", "Praça Seca", "Catete", "Mangueira", "Cordovil", "Ramos",
@@ -90,6 +98,104 @@ const BAIRROS = Object.entries(BAIRROS_POR_AREA).flatMap(([area, nomes]) =>
     nomes.map(nome => ({ nome, area }))
 );
 
+// Regiões da Águas do Rio. Esta classificação é independente de AREA_A/AREA_B.
+const MUNICIPIOS_POR_REGIAO = {
+    REGIAO_1: {
+        nome: "Águas do Rio - B1",
+        municipios: [
+            "Aperibé", "Cachoeiras de Macacu", "Cambuci", "Cantagalo",
+            "Casimiro de Abreu - Barra de São João", "Cordeiro", "Duas Barras",
+            "Itaboraí", "Itaocara", "Magé", "Maricá", "Miracema", "Rio Bonito",
+            "São Francisco de Itabapoana", "São Gonçalo", "São Sebastião do Alto",
+            "Saquarema - Jaconé", "Tanguá", "Rio de Janeiro - AP2"
+        ]
+    },
+    REGIAO_4: {
+        nome: "Águas do Rio - B4",
+        municipios: [
+            "Belford Roxo", "Duque de Caxias", "Japeri", "Mesquita",
+            "Nilópolis", "Nova Iguaçu", "Queimados", "São João de Meriti",
+            "Rio de Janeiro - AP1/AP3"
+        ]
+    }
+};
+
+const MUNICIPIOS = Object.entries(MUNICIPIOS_POR_REGIAO).flatMap(
+    ([regiao, dados]) => dados.municipios.map(nome => ({
+        nome,
+        regiao,
+        nomeRegiao: dados.nome
+    }))
+);
+
+const NOMES_MUNICIPIOS = new Set(MUNICIPIOS.map(item => normalizarTexto(item.nome)));
+
+// Bairros cariocas oficiais da concessão (fonte: CEDAE/AGENERSA).
+const BAIRROS_OFICIAIS = [
+    "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta",
+    "Andaraí", "Barros Filho", "Bancários", "Benfica", "Bento Ribeiro",
+    "Bonsucesso", "Botafogo", "Brás de Pina", "Cachambi", "Cacuia", "Caju",
+    "Campinho", "Cascadura", "Catete", "Catumbi", "Cavalcanti", "Centro",
+    "Cidade Nova", "Cidade Universitária", "Cocotá", "Coelho Neto", "Colégio",
+    "Complexo do Alemão", "Copacabana", "Cordovil", "Cosme Velho", "Costa Barros",
+    "Del Castilho", "Encantado", "Engenheiro Leal", "Engenho da Rainha",
+    "Engenho de Dentro", "Engenho Novo", "Estácio", "Freguesia (Ilha do Governador)",
+    "Flamengo", "Galeão", "Gamboa", "Gávea", "Glória", "Grajaú", "Guadalupe",
+    "Higienópolis", "Honório Gurgel", "Humaitá", "Inhaúma", "Ipanema", "Irajá",
+    "Jacaré", "Jacarezinho", "Jardim Botânico", "Jardim Carioca", "Jardim Guanabara",
+    "Jardim América", "Lagoa", "Lapa", "Laranjeiras", "Leblon", "Leme",
+    "Lins de Vasconcelos", "Madureira", "Mangueira", "Manguinhos", "Maré",
+    "Maracanã", "Marechal Hermes", "Maria da Graça", "Méier", "Olaria",
+    "Oswaldo Cruz", "Paquetá", "Parada de Lucas", "Parque Anchieta", "Parque Columbia",
+    "Pavuna", "Penha", "Penha Circular", "Piedade", "Pilares", "Praça Seca",
+    "Praça da Bandeira", "Quintino Bocaiúva", "Ramos", "Riachuelo",
+    "Ricardo de Albuquerque", "Rio Comprido", "Rocha", "Rocha Miranda", "Rocinha",
+    "Sampaio", "Santa Teresa", "Santo Cristo", "São Conrado", "São Cristóvão",
+    "São Francisco Xavier", "Saúde", "Todos os Santos", "Tomás Coelho", "Turiaçu",
+    "Urca", "Vasco da Gama", "Vaz Lobo", "Vicente de Carvalho", "Vidigal",
+    "Vigário Geral", "Vila da Penha", "Vila Isabel", "Vila Kosmos", "Vila Valqueire",
+    "Vista Alegre", "Moneró", "Pitangueiras", "Portuguesa", "Praia da Bandeira",
+    "Ribeira", "Tauá", "Tijuca", "Zumbi", "Ilha do Governador"
+];
+
+const BAIRROS_B1 = new Set([
+    "Botafogo", "Catete", "Copacabana", "Cosme Velho", "Flamengo", "Gávea",
+    "Glória", "Humaitá", "Ipanema", "Jardim Botânico", "Lagoa", "Laranjeiras",
+    "Leblon", "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal"
+].map(normalizarTexto));
+
+const AREA_TARIFARIA_POR_LOCALIDADE = new Map(
+    BAIRROS.map(item => [normalizarTexto(item.nome), item.area])
+);
+
+const BAIRROS_CONCESSAO = BAIRROS_OFICIAIS.map(nome => ({
+    nome,
+    bloco: BAIRROS_B1.has(normalizarTexto(nome)) ? "B1" : "B4",
+    areaTarifaria: AREA_TARIFARIA_POR_LOCALIDADE.get(normalizarTexto(nome)) || null
+}));
+
+const BAIRROS_CONSULTA = BAIRROS_CONCESSAO;
+
+function preencherMunicipios() {
+    const select = document.getElementById("municipio");
+
+    Object.entries(MUNICIPIOS_POR_REGIAO).forEach(([regiao, dados]) => {
+        const grupo = document.createElement("optgroup");
+        grupo.label = dados.nome;
+
+        dados.municipios.forEach(nome => {
+            const opcao = document.createElement("option");
+            opcao.value = regiao;
+            opcao.textContent = nome;
+            opcao.dataset.nome = nome;
+            opcao.dataset.area = nome === "Rio de Janeiro - AP2" ? "AREA_A" : "AREA_B";
+            grupo.appendChild(opcao);
+        });
+
+        select.appendChild(grupo);
+    });
+}
+
 function pesquisarBairro() {
     const termo = normalizarTexto(document.getElementById("buscaBairro").value);
     const resultado = document.getElementById("resultadoBairro");
@@ -100,10 +206,10 @@ function pesquisarBairro() {
         return;
     }
 
-    const encontrados = BAIRROS.filter(item => normalizarTexto(item.nome).includes(termo));
+    const encontrados = BAIRROS_CONSULTA.filter(item => normalizarTexto(item.nome).includes(termo));
 
     if (!encontrados.length) {
-        resultado.textContent = "Bairro ou município não encontrado na base informada.";
+        resultado.textContent = "Bairro não encontrado na base informada.";
         resultado.className = "bairro-resultado erro";
         return;
     }
@@ -112,8 +218,8 @@ function pesquisarBairro() {
     resultado.innerHTML = encontrados.slice(0, 10).map(item => `
         <div class="bairro-item">
             <strong>${item.nome}</strong>
-            <span>Área tarifária: <b>${item.area === "AREA_A" ? "Área A" : "Área B"}</b></span>
-           
+            <span>Bloco da concessão: <b>Águas do Rio - ${item.bloco}</b></span>
+            <span>Área tarifária: <b>${item.areaTarifaria ? (item.areaTarifaria === "AREA_A" ? "Área A" : "Área B") : "não informada"}</b></span>
         </div>
     `).join("");
 }
@@ -140,7 +246,20 @@ function atualizarCampoTarifa() {
     document.getElementById("tarifaResidencialField").hidden = !visivel;
 }
 
+function sincronizarLocalidade() {
+    const municipio = document.getElementById("municipio");
+    const opcao = municipio.selectedOptions[0];
+
+    if (!municipio.value || !opcao) return false;
+
+    document.getElementById("regiao").value = municipio.value;
+    document.getElementById("area").value = opcao.dataset.area;
+    return true;
+}
+
 function simular({ rolarResultado = false } = {}) {
+    sincronizarLocalidade();
+
     const regiao = document.getElementById("regiao").value;
     const area = document.getElementById("area").value;
     const categoria = document.getElementById("categoria").value;
@@ -193,12 +312,19 @@ function simular({ rolarResultado = false } = {}) {
 
 document.getElementById("categoria").addEventListener("change", () => { atualizarCampoTarifa(); simular(); });
 document.getElementById("regiao").addEventListener("change", simular);
-document.getElementById("area").addEventListener("change", simular);
+document.getElementById("municipio").addEventListener("change", event => {
+    if (event.target.value) simular();
+});
+document.getElementById("area").addEventListener("change", () => {
+    sincronizarLocalidade();
+    simular();
+});
 document.getElementById("tarifaResidencial").addEventListener("change", simular);
 document.getElementById("consumo").addEventListener("change", simular);
 document.getElementById("economias").addEventListener("change", simular);
 document.getElementById("esgoto").addEventListener("change", simular);
 document.getElementById("calcularButton").addEventListener("click", () => simular({ rolarResultado: true }));
 document.getElementById("buscaBairro").addEventListener("input", pesquisarBairro);
+preencherMunicipios();
 atualizarCampoTarifa();
 simular();

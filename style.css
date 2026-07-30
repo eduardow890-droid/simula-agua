@@ -1,7 +1,7 @@
 :root {
     --primary: #087ea4; --primary-dark: #075985; --background: #eef7fa;
     --surface: rgba(255,255,255,.92); --text: #16323f; --muted: #6b7d85;
-    --border: #dce9ed; --success: #0f9f6e;
+    --border: #dce9ed; --success: #0f9f6e; --accent: #087ea4;
 }
 * { box-sizing: border-box; margin: 0; padding: 0; }
 body {
@@ -26,6 +26,9 @@ h1 { color: var(--primary-dark); font-size: clamp(1.75rem, 4vw, 2.5rem); line-he
 .bairro-item:first-child { padding-top: 0; }
 .bairro-item:last-child { padding-bottom: 0; border-bottom: 0; }
 .bairro-item span { color: var(--muted); font-size: .82rem; }
+.bairro-item button { justify-self: start; margin-top: 5px; padding: 5px 9px; border: 0; border-radius: 5px; color: white; background: var(--accent); cursor: pointer; font-size: .78rem; }
+.bairro-item button:hover { filter: brightness(.94); }
+.bairro-confirmacao { margin: 12px 0 0; color: var(--accent); font-weight: 600; }
 .card, .resultado { background: var(--surface); border: 1px solid var(--border); border-radius: 20px; padding: 28px; box-shadow: 0 18px 45px rgba(15,73,92,.08); }
 .section-heading { display: flex; align-items: center; gap: 13px; margin-bottom: 22px; }
 .section-heading h2 { color: var(--primary-dark); font-size: 1.18rem; }

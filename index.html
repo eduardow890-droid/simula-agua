@@ -22,11 +22,16 @@
             <span class="section-icon">⌕</span>
             <div>
                 <h2 id="bairroTitulo">Consultar bairro</h2>
-                <p>Pesquise um bairro ou município para descobrir a área tarifária.</p>
+                <p>Selecione o município para definir a região e, se quiser, consulte um bairro.</p>
             </div>
         </div>
-        <label for="buscaBairro">Bairro ou município</label>
-        <input id="buscaBairro" type="search" autocomplete="off" placeholder="Ex.: Botafogo, Niterói...">
+        <label for="municipio">Município ou localidade</label>
+        <select id="municipio">
+            <option value="">Selecione o município ou localidade</option>
+        </select>
+
+        <label for="buscaBairro">Bairro (opcional)</label>
+        <input id="buscaBairro" type="search" autocomplete="off" placeholder="Ex.: Botafogo, Bonsucesso...">
         <div id="resultadoBairro" class="bairro-resultado" aria-live="polite">
             Digite pelo menos 2 caracteres para pesquisar.
         </div>
