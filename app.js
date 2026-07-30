@@ -54,7 +54,6 @@ const TABELAS = {
 
 // Premissas do simulador; confirme estes percentuais na regra aplicável antes de uso real.
 const PERCENTUAL_ESGOTO = 1;
-const PERCENTUAL_RECURSOS_HIDRICOS = 0.0219;
 
 function formatarMoeda(valor) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
