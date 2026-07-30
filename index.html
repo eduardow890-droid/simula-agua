@@ -17,6 +17,21 @@
         </div>
     </header>
 
+    <section class="card bairro-card" aria-labelledby="bairroTitulo">
+        <div class="section-heading">
+            <span class="section-icon">⌕</span>
+            <div>
+                <h2 id="bairroTitulo">Consultar bairro</h2>
+                <p>Pesquise um bairro ou município para descobrir a área tarifária.</p>
+            </div>
+        </div>
+        <label for="buscaBairro">Bairro ou município</label>
+        <input id="buscaBairro" type="search" autocomplete="off" placeholder="Ex.: Botafogo, Niterói...">
+        <div id="resultadoBairro" class="bairro-resultado" aria-live="polite">
+            Digite pelo menos 2 caracteres para pesquisar.
+        </div>
+    </section>
+
     <div class="content-grid">
         <section class="card form-card">
             <div class="section-heading">
@@ -74,6 +89,7 @@
 
             <p><span>Água</span><span id="agua">R$ 0,00</span></p>
             <p><span>Esgoto</span><span id="valorEsgoto">R$ 0,00</span></p>
+            <p><span>Recursos hídricos</span><span id="rh">R$ 0,00</span></p>
             <hr>
             <h3><span>Total estimado</span><span id="total">R$ 0,00</span></h3>
             <p><span>Economias</span><span id="economiasResultado"></span></p>

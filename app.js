@@ -54,6 +54,69 @@ const TABELAS = {
 
 // Premissas do simulador; confirme estes percentuais na regra aplicável antes de uso real.
 const PERCENTUAL_ESGOTO = 1;
+// Ajuste este valor quando o percentual oficial de recursos hídricos for confirmado.
+const PERCENTUAL_RECURSOS_HIDRICOS = 0;
+
+const BAIRROS_POR_AREA = {
+    AREA_A: [
+        "Botafogo", "Lapa", "Coelho Neto", "Praça Seca", "Catete", "Mangueira", "Cordovil", "Ramos",
+        "Copacabana", "Paquetá", "Del Castilho", "Riachuelo", "Cosme Velho", "Rio Comprido", "Encantado", "Rocha",
+        "Flamengo", "Santa Teresa", "Engenho da Rainha", "Sampaio", "Glória", "Santo Cristo", "Engenho de Dentro", "São Francisco Xavier",
+        "Humaitá", "São Cristóvão", "Engenho Novo", "Todos os Santos", "Laranjeiras", "Saúde", "Higienópolis", "Tomás Coelho",
+        "Leme", "Vasco da Gama", "Honório Gurgel", "Vigário Geral", "Urca", "Alto da Boa Vista", "Inhaúma", "Vila Valqueire",
+        "Gávea", "Andaraí", "Irajá", "Bancários", "Ipanema", "Grajaú", "Jacaré", "Cacuia",
+        "Jardim Botânico", "Maracanã", "Jacarezinho", "Cocotá", "Lagoa", "Praça da Bandeira", "Jardim América", "Freguesia (Ilha do Governador)",
+        "Leblon", "Tijuca", "Lins de Vasconcelos", "Galeão", "Rocinha", "Vila Isabel", "Manguinhos", "Jardim Carioca",
+        "São Conrado", "Abolição", "Maré", "Jardim Guanabara", "Vidigal", "Acari", "Méier", "Moneró",
+        "Benfica", "Água Santa", "Olaria", "Pitangueiras", "Caju", "Barros Filho", "Parada de Lucas", "Portuguesa",
+        "Catumbi", "Bonsucesso", "Parque Columbia", "Praia da Bandeira", "Centro", "Brás de Pina", "Pavuna", "Ribeira",
+        "Cidade Nova", "Cachambi", "Penha", "Tauá", "Estácio", "Campinho", "Piedade"
+    ],
+    AREA_B: [
+        "Anchieta", "Engenheiro Leal", "Parque Anchieta", "Vaz Lobo", "Bento Ribeiro", "Guadalupe", "Penha Circular", "Vicente de Carvalho",
+        "Cascadura", "Madureira", "Quintino Bocaiúva", "Vila da Penha", "Cavalcanti", "Marechal Hermes", "Ricardo de Albuquerque", "Vila Kosmos",
+        "Colégio", "Maria da Graça", "Rocha Miranda", "Vista Alegre", "Aperibé", "Duas Barras", "Mesquita", "São Gonçalo",
+        "Belford Roxo", "Duque de Caxias", "Miracema", "São João de Meriti", "Cachoeiras de Macacu", "Itaboraí", "Nilópolis", "São Sebastião do Alto",
+        "Cambuci", "Itaocara", "Nova Iguaçu", "Saquarema", "Cantagalo", "Japeri", "Queimados", "Tanguá",
+        "Casimiro de Abreu", "Magé", "Rio Bonito", "Cordeiro", "Maricá", "São Francisco de Itabapoana"
+    ]
+};
+
+function normalizarTexto(texto) {
+    return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
+}
+
+const BAIRROS = Object.entries(BAIRROS_POR_AREA).flatMap(([area, nomes]) =>
+    nomes.map(nome => ({ nome, area }))
+);
+
+function pesquisarBairro() {
+    const termo = normalizarTexto(document.getElementById("buscaBairro").value);
+    const resultado = document.getElementById("resultadoBairro");
+
+    if (termo.length < 2) {
+        resultado.textContent = "Digite pelo menos 2 caracteres para pesquisar.";
+        resultado.className = "bairro-resultado";
+        return;
+    }
+
+    const encontrados = BAIRROS.filter(item => normalizarTexto(item.nome).includes(termo));
+
+    if (!encontrados.length) {
+        resultado.textContent = "Bairro ou município não encontrado na base informada.";
+        resultado.className = "bairro-resultado erro";
+        return;
+    }
+
+    resultado.className = "bairro-resultado sucesso";
+    resultado.innerHTML = encontrados.slice(0, 10).map(item => `
+        <div class="bairro-item">
+            <strong>${item.nome}</strong>
+            <span>Área tarifária: <b>${item.area === "AREA_A" ? "Área A" : "Área B"}</b></span>
+            <span>Região tarifária selecionada: <b>${document.getElementById("regiao").selectedOptions[0].textContent.split(" — ")[0]}</b></span>
+        </div>
+    `).join("");
+}
 
 function formatarMoeda(valor) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
@@ -92,7 +155,13 @@ function simular({ rolarResultado = false } = {}) {
     }
 
     const regiaoTabela = TABELAS[regiao];
-    const tabela = regiaoTabela.areas[area][categoria];
+    const tabela = regiaoTabela?.areas?.[area]?.[categoria];
+
+    if (!tabela) {
+        alert("Não foi possível encontrar a tarifa para os dados selecionados.");
+        return;
+    }
+
     const consumoMinimo = tabela.minimo * economias;
     const volumeFaturado = Math.max(consumo, consumoMinimo);
     const tarifaSocial = categoria === "residencial" && tarifaResidencial === "social";
@@ -130,5 +199,7 @@ document.getElementById("consumo").addEventListener("change", simular);
 document.getElementById("economias").addEventListener("change", simular);
 document.getElementById("esgoto").addEventListener("change", simular);
 document.getElementById("calcularButton").addEventListener("click", () => simular({ rolarResultado: true }));
+document.getElementById("buscaBairro").addEventListener("input", pesquisarBairro);
+document.getElementById("regiao").addEventListener("change", pesquisarBairro);
 atualizarCampoTarifa();
 simular();
