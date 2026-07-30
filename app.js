@@ -113,7 +113,7 @@ function pesquisarBairro() {
         <div class="bairro-item">
             <strong>${item.nome}</strong>
             <span>Área tarifária: <b>${item.area === "AREA_A" ? "Área A" : "Área B"}</b></span>
-            <span>Região tarifária selecionada: <b>${document.getElementById("regiao").selectedOptions[0].textContent.split(" — ")[0]}</b></span>
+           
         </div>
     `).join("");
 }
@@ -200,6 +200,5 @@ document.getElementById("economias").addEventListener("change", simular);
 document.getElementById("esgoto").addEventListener("change", simular);
 document.getElementById("calcularButton").addEventListener("click", () => simular({ rolarResultado: true }));
 document.getElementById("buscaBairro").addEventListener("input", pesquisarBairro);
-document.getElementById("regiao").addEventListener("change", pesquisarBairro);
 atualizarCampoTarifa();
 simular();
