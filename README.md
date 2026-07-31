@@ -1,111 +1,115 @@
-# 💧 Simula Água
+# Simula Água
 
-Simulador de cálculo de tarifa de água e esgoto desenvolvido com HTML, CSS e JavaScript.
+Simulador educacional de estimativa de tarifas de água, esgoto e Recursos Hídricos da Águas do Rio.
 
-O objetivo deste projeto é permitir que usuários estimem o valor de sua conta de água de forma simples e rápida, utilizando as tarifas vigentes da concessionária, sem possuir qualquer vínculo oficial com ela.
+O projeto foi desenvolvido com HTML, CSS e JavaScript puro, sem dependências externas e sem backend.
 
-> **Aviso:** Este projeto é independente e foi desenvolvido apenas para fins educacionais e de simulação.
+> **Importante:** esta é uma ferramenta independente para estudo. O resultado é uma estimativa e não substitui a fatura, a memória de cálculo da concessionária ou uma manifestação da AGENERSA.
 
----
+## Funcionalidades
 
-## ✨ Funcionalidades
+- Cálculo por faixas de consumo.
+- Regiões 1 e 4.
+- Áreas tarifárias A e B.
+- Categorias residencial, comercial, industrial, pública e pública estadual.
+- Tarifa residencial 1, Tarifa 2 e tarifa social.
+- Cálculo de água, esgoto e Recursos Hídricos.
+- Suporte a múltiplas economias.
+- Seleção de município e consulta de bairro.
+- Memória detalhada do cálculo.
+- Modo noturno com preferência salva no navegador.
+- Botão para limpar os dados.
+- Impressão do resultado.
+- Interface responsiva.
+- Avisos de fonte, premissas e limitações.
 
-- Cálculo automático da tarifa de água.
-- Cálculo da tarifa de esgoto.
-- Cálculo da cobrança de Recursos Hídricos.
-- Interface simples e responsiva.
-- Simulação instantânea diretamente no navegador.
-- Exibição detalhada dos valores calculados.
+## Fonte tarifária
 
----
+Os valores tarifários utilizados foram reproduzidos da página oficial:
 
-## 🛠️ Tecnologias utilizadas
+[Águas do Rio — Legislação e Tarifas](https://aguasdorio.com.br/legislacao-e-tarifas/)
 
- # Tecnologias
-> ![HTML](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
-![CSS](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
+A tabela atualmente cadastrada no projeto corresponde às tarifas apresentadas como válidas a partir de dezembro de 2025.
 
+## Base normativa consultada
 
----
+- [Lei Estadual nº 4.247/2003 — ALERJ](https://www3.alerj.rj.gov.br/lotus_notes/default.asp?URL=L0NPTlRMRUkuTlNGL2M4YWEwOTAwMDI1ZmVlZjYwMzI1NmRmZjAwNmM4OGY0P09wZW5Eb2N1bWVudA%3D%3D&id=2)
+- [Decreto Estadual nº 41.974/2009 — INEA](https://www.inea.rj.gov.br/wp-content/uploads/2019/01/base_legal-2.pdf)
+- [Instrução Normativa AGENERSA nº 125/2024](https://www.rj.gov.br/agenersa/sites/default/files/arquivos_paginas_basicas/IN125.pdf)
 
-## 📷 Demonstração
+## Premissas do simulador
 
+- O cálculo aplica os valores publicados em cada faixa tarifária.
+- A aplicação progressiva das faixas é uma premissa didática do simulador.
+- O limite de 2% para Recursos Hídricos é utilizado como limite legal máximo da simulação, não como percentual homologado para todos os blocos ou exercícios.
+- O percentual de esgoto é uma premissa configurada no projeto e deve ser confirmado na documentação aplicável.
+- Consumidores na tarifa social não recebem o repasse de Recursos Hídricos no cálculo do simulador.
+- O resultado é arredondado para apresentação em reais.
 
-![Tela do Simulador](simulador.png)
+## Limitações conhecidas
 
+- A base de bairros e municípios ainda é parcial.
+- A busca de bairros ainda não representa toda a relação oficial município–bairro da concessão.
+- Não há controle automático de vigências tarifárias.
+- Não há integração com faturas reais.
+- Não há validação automática do resultado contra a memória de cálculo da concessionária.
+- O projeto não deve ser utilizado para cobrança, contestação ou decisão financeira sem conferência documental.
 
-## 🚀 Como utilizar
+## Como utilizar
 
-1. Clone este repositório
+1. Baixe ou clone o projeto.
+2. Abra o arquivo `index.html` em um navegador moderno.
+3. Selecione a região, área, categoria e tarifa.
+4. Informe o consumo e a quantidade de economias.
+5. Escolha se o imóvel possui esgoto.
+6. Clique em **Calcular simulação**.
+7. Abra **Ver memória do cálculo** para consultar os subtotais.
 
-```bash
-git clone https://github.com/eduardow890-droid/simula-agua.git
-```
+Não é necessário instalar dependências.
 
-2. Abra o arquivo
+## Estrutura do projeto
 
-```
-index.html
-```
-
-em qualquer navegador moderno.
-
-Não é necessário instalar nenhuma dependência.
-
----
-
-## 📂 Estrutura do projeto
-
-```
+```text
 simula-agua/
-│
 ├── index.html
 ├── style.css
 ├── app.js
+├── METODOLOGIA.md
+├── RELATORIO_ALTERACOES.md
+├── simulador.png
 └── README.md
 ```
 
----
+## Organização visual
 
-## ⚠️ Importante
+As principais variáveis visuais estão no início de `style.css`, incluindo:
 
-Este simulador fornece apenas uma estimativa baseada nas tarifas cadastradas.
+- cores;
+- fundos;
+- bordas;
+- sombras;
+- raios dos cartões;
+- tipografia;
+- foco dos campos.
 
-O valor apresentado pode ser diferente da conta oficial devido a fatores como:
+## Objetivo educacional
 
-- impostos;
-- arredondamentos;
-- cobranças específicas;
-- atualizações tarifárias;
-- outras regras da concessionária.
+O projeto serve para praticar:
 
-Sempre consulte a fatura oficial para valores definitivos.
+- lógica de programação;
+- JavaScript e manipulação do DOM;
+- formulários e validação;
+- cálculos por faixas;
+- acessibilidade;
+- responsividade;
+- organização e documentação de fontes de dados.
 
----
-
-## 🎯 Objetivo
-
-Este projeto foi criado para:
-
-- estudar JavaScript;
-- praticar lógica de programação;
-- automatizar cálculos tarifários;
-- facilitar a conferência de contas de água.
-
----
-
-## 📄 Licença
+## Licença
 
 Este projeto está disponível sob a licença MIT.
 
-Você pode utilizar, modificar e compartilhar respeitando os termos da licença.
-
----
-
-## 👨‍💻 Autor
+## Autor
 
 **Wagner Eduardo**
 
-GitHub:
-https://github.com/eduardow890-droid
+GitHub: [eduardow890-droid](https://github.com/eduardow890-droid)

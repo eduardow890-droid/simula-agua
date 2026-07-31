@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Simulador educacional de tarifa de água, esgoto e recursos hídricos.">
     <title>Simulador de Consumo de Água</title>
     <link rel="stylesheet" href="style.css">
 </head>
@@ -15,6 +16,9 @@
             <h1>Simulador de Consumo de Água</h1>
             <p class="subtitle">Faça uma estimativa de água, esgoto e recursos hídricos.</p>
         </div>
+        <button id="temaButton" class="tema-button" type="button" aria-label="Ativar modo noturno" aria-pressed="false">
+            <span aria-hidden="true">&#9790;</span> Modo noturno
+        </button>
     </header>
 
     <section class="card bairro-card" aria-labelledby="bairroTitulo">
@@ -31,14 +35,15 @@
         </select>
 
         <label for="buscaBairro">Bairro (opcional)</label>
-        <input id="buscaBairro" type="search" autocomplete="off" placeholder="Ex.: Botafogo, Bonsucesso...">
+            <input id="buscaBairro" type="search" autocomplete="off" aria-describedby="notaBaseBairros" placeholder="Ex.: Botafogo, Bonsucesso...">
+        <p id="notaBaseBairros" class="field-note">A base de bairros ainda está em consolidação por município.</p>
         <div id="resultadoBairro" class="bairro-resultado" aria-live="polite">
             Digite pelo menos 2 caracteres para pesquisar.
         </div>
     </section>
 
     <div class="content-grid">
-        <section class="card form-card">
+        <form class="card form-card" id="simulacaoForm">
             <div class="section-heading">
                 <span class="section-icon">⚙</span>
                 <div><h2>Dados do imóvel</h2><p>Informe os dados para realizar a simulação.</p></div>
@@ -76,7 +81,8 @@
             </div>
 
             <label for="consumo">Consumo (m³)</label>
-            <input type="number" id="consumo" min="0" step="0.01" inputmode="decimal" value="15">
+            <input type="number" id="consumo" min="0" step="0.01" inputmode="decimal" value="15" aria-describedby="notaConsumo">
+            <p id="notaConsumo" class="field-note">Use o consumo total do hidrômetro no período da conta.</p>
 
             <label for="economias">Quantidade de economias</label>
             <input type="number" id="economias" min="1" step="1" inputmode="numeric" value="1">
@@ -84,10 +90,14 @@
             <label class="checkbox-label"><input type="checkbox" id="esgoto" checked> Possui esgoto</label>
 
             <p class="calculation-note">A tarifa social é aplicada por economia. Os percentuais de esgoto e recursos hídricos seguem as premissas configuradas no projeto.</p>
-            <button id="calcularButton" type="button">Calcular simulação <span>→</span></button>
-        </section>
+            <p class="calculation-note">A tabela oficial apresenta faixas de consumo e valores por m³. O simulador aplica esses valores por faixa como premissa de cálculo; essa interpretação não substitui a memória de cálculo oficial.</p>
+            <div class="form-actions">
+                <button id="calcularButton" type="submit">Calcular simulação <span>→</span></button>
+                <button id="limparButton" class="secondary-button" type="button">Limpar dados</button>
+            </div>
+        </form>
 
-        <section id="resultado" class="resultado">
+        <section id="resultado" class="resultado" aria-live="polite" aria-atomic="false">
             <div class="section-heading">
                 <span class="section-icon">✦</span>
                 <div><h2>Resultado estimado</h2><p>Confira os valores da sua simulação.</p></div>
@@ -96,11 +106,21 @@
             <p><span>Água</span><span id="agua">R$ 0,00</span></p>
             <p><span>Esgoto</span><span id="valorEsgoto">R$ 0,00</span></p>
             <p><span>Recursos hídricos</span><span id="rh">R$ 0,00</span></p>
+            <p><span>Percentual de recursos hídricos</span><span id="percentualRhResultado"></span></p>
             <hr>
             <h3><span>Total estimado</span><span id="total">R$ 0,00</span></h3>
             <p><span>Economias</span><span id="economiasResultado"></span></p>
             <p><span>Consumo mínimo</span><span id="consumoMinimo"></span></p>
             <p><span>Volume faturado</span><span id="volumeFaturado"></span></p>
+            <p><span>Fonte tarifária</span><a id="fonteResultado" href="https://aguasdorio.com.br/legislacao-e-tarifas/" target="_blank" rel="noopener noreferrer">Águas do Rio — Legislação e Tarifas</a></p>
+            <details class="memoria-calculo">
+                <summary>Ver memória do cálculo</summary>
+                <div id="memoriaCalculo" aria-live="polite">Informe os dados para visualizar o detalhamento.</div>
+            </details>
+            <p id="mensagemErro" class="mensagem-erro" role="alert" hidden></p>
+            <div class="resultado-acoes">
+                <button id="imprimirButton" type="button">Imprimir resultado</button>
+            </div>
         </section>
     </div>
 
@@ -108,6 +128,17 @@
         <strong>Projeto independente de estudo</strong>
         <p>Esta ferramenta foi desenvolvida exclusivamente para fins educacionais, utilizando dados públicos disponíveis.</p>
         <p>Não possui vínculo, autorização ou representação de empresa ou órgão público. Os valores exibidos são apenas estimativas e não substituem uma fatura, consulta ou informação oficial.</p>
+    </aside>
+    <p class="legal-note">Esta é uma simulação educacional independente. As tarifas são reproduzidas da página oficial de Legislação e Tarifas da Águas do Rio. O cálculo por faixas é uma premissa do simulador e não substitui a fatura, a memória de cálculo da concessionária ou uma manifestação da AGENERSA.</p>
+
+    <aside class="references-card" aria-labelledby="referenciasTitulo">
+        <h2 id="referenciasTitulo">Referências utilizadas</h2>
+        <p>Para esta versão, o simulador utiliza 2% como limite legal máximo da simulação para Recursos Hídricos. Esse valor não representa necessariamente o percentual homologado para cada bloco ou exercício.</p>
+        <ul>
+            <li><a href="https://www3.alerj.rj.gov.br/lotus_notes/default.asp?URL=L0NPTlRMRUkuTlNGL2M4YWEwOTAwMDI1ZmVlZjYwMzI1NmRmZjAwNmM4OGY0P09wZW5Eb2N1bWVudA%3D%3D&amp;id=2" target="_blank" rel="noopener noreferrer">Lei Estadual nº 4.247/2003 — art. 24, §4º</a></li>
+            <li><a href="https://www.inea.rj.gov.br/wp-content/uploads/2019/01/base_legal-2.pdf" target="_blank" rel="noopener noreferrer">Decreto Estadual nº 41.974/2009 — fórmula do repasse</a></li>
+            <li><a href="https://www.rj.gov.br/agenersa/sites/default/files/arquivos_paginas_basicas/IN125.pdf" target="_blank" rel="noopener noreferrer">AGENERSA — Instrução Normativa nº 125/2024</a></li>
+        </ul>
     </aside>
 </main>
 <script src="app.js"></script>

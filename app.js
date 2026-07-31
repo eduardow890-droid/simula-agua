@@ -55,15 +55,24 @@ const TABELAS = {
 // Premissas do simulador; confirme estes percentuais na regra aplicável antes de uso real.
 const PERCENTUAL_ESGOTO = 1;
 // Ajuste este valor quando o percentual oficial de recursos hídricos for confirmado.
-const PERCENTUAL_RECURSOS_HIDRICOS = 0;
+const PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO = {
+    // Limite mÃ¡ximo legal usado como premissa da simulaÃ§Ã£o.
+    REGIAO_1: 0.02,
+    REGIAO_4: 0.02
+};
 
 const METADADOS_BASE = {
     vigenciaTarifas: "dezembro de 2025",
-    fonteConcessao: "CEDAE / Águas do Rio",
+    fonteConcessao: "Águas do Rio — página oficial de Legislação e Tarifas",
+    urlFonteTarifas: "https://aguasdorio.com.br/legislacao-e-tarifas/",
     areaTarifariaInformadaPor: "tabela fornecida pelo usuário",
     percentualEsgotoConfirmado: false,
-    percentualRecursosHidricosConfirmado: false
+    percentualRecursosHidricosConfirmado: true,
+    statusRecursosHidricos: "limite legal mÃ¡ximo utilizado como premissa da simulaÃ§Ã£o",
+    fonteRecursosHidricos: "Lei Estadual n° 4.247/2003, art. 24, §4º"
 };
+
+const STATUS_BASE = "Base de localidades parcial; confirme o município e o bairro antes de usar a simulação.";
 
 const BAIRROS_POR_AREA = {
     AREA_A: [
@@ -256,6 +265,12 @@ function formatarMoeda(valor) {
     return valor.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
 }
 
+function mostrarErro(mensagem = "") {
+    const campo = document.getElementById("mensagemErro");
+    campo.textContent = mensagem;
+    campo.hidden = !mensagem;
+}
+
 function calcularPorFaixas(volume, economias, faixas) {
     let total = 0;
     let inicioFaixa = 0;
@@ -267,6 +282,38 @@ function calcularPorFaixas(volume, economias, faixas) {
         if (volume <= limite) break;
     }
     return total;
+}
+
+function detalharFaixas(volume, economias, faixas) {
+    let inicioFaixa = 0;
+    return faixas.reduce((linhas, faixa) => {
+        const limite = faixa.ate * economias;
+        const volumeNaFaixa = Math.max(0, Math.min(volume, limite) - inicioFaixa);
+        if (volumeNaFaixa > 0) {
+            const subtotal = volumeNaFaixa * faixa.valor;
+            linhas.push(`${volumeNaFaixa.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} m³ × ${formatarMoeda(faixa.valor)} = ${formatarMoeda(subtotal)}`);
+        }
+        inicioFaixa = limite;
+        return linhas;
+    }, []);
+}
+
+function atualizarMemoria({ tarifaSocial, volumeFaturado, economias, tabela, tarifaResidencial, agua, esgoto, recursosHidricos, total }) {
+    const memoria = document.getElementById("memoriaCalculo");
+    const linhas = [];
+    linhas.push(`Volume faturado: ${tarifaSocial ? "tarifa social fixa" : `${volumeFaturado} m³`}`);
+    linhas.push(`Economias: ${economias}`);
+    if (tarifaSocial) {
+        linhas.push(`Tarifa social: ${formatarMoeda(agua / economias)} por economia`);
+    } else {
+        const faixas = tabela.tarifas?.[tarifaResidencial] || tabela.faixas;
+        linhas.push(...detalharFaixas(volumeFaturado, economias, faixas));
+    }
+    linhas.push(`Água: ${formatarMoeda(agua)}`);
+    linhas.push(`Esgoto: ${formatarMoeda(esgoto)}`);
+    linhas.push(`Recursos Hídricos: ${formatarMoeda(recursosHidricos)}`);
+    linhas.push(`Total estimado: ${formatarMoeda(total)}`);
+    memoria.textContent = linhas.join("\n");
 }
 
 function atualizarCampoTarifa() {
@@ -300,6 +347,7 @@ function sincronizarLocalidade() {
 
 function simular({ rolarResultado = false } = {}) {
     sincronizarLocalidade();
+    mostrarErro();
 
     const regiao = document.getElementById("regiao").value;
     const area = document.getElementById("area").value;
@@ -335,20 +383,47 @@ function simular({ rolarResultado = false } = {}) {
         ? regiaoTabela.tarifaSocial * economias
         : calcularPorFaixas(volumeFaturado, economias, categoria === "residencial" ? tabela.tarifas[tarifaResidencial] : tabela.faixas);
     const esgoto = possuiEsgoto ? agua * PERCENTUAL_ESGOTO : 0;
-    const recursosHidricos = (agua + esgoto) * PERCENTUAL_RECURSOS_HIDRICOS;
+    const percentualRecursosHidricos = PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO[regiao] || 0;
+    const recursosHidricos = tarifaSocial ? 0 : (agua + esgoto) * percentualRecursosHidricos;
     const total = agua + esgoto + recursosHidricos;
 
     document.getElementById("agua").textContent = formatarMoeda(agua);
     document.getElementById("valorEsgoto").textContent = formatarMoeda(esgoto);
     document.getElementById("rh").textContent = formatarMoeda(recursosHidricos);
     document.getElementById("total").textContent = formatarMoeda(total);
+    document.getElementById("fonteResultado").textContent = `${METADADOS_BASE.fonteConcessao}; ${METADADOS_BASE.vigenciaTarifas}`;
+    document.getElementById("percentualRhResultado").textContent = tarifaSocial
+        ? "Não aplicado — tarifa social"
+        : `${(percentualRecursosHidricos * 100).toLocaleString("pt-BR", { minimumFractionDigits: 2 })}% — limite legal da simulação`;
     document.getElementById("economiasResultado").textContent = economias;
     document.getElementById("consumoMinimo").textContent = tarifaSocial ? "não aplicável" : `${consumoMinimo} m³`;
     document.getElementById("volumeFaturado").textContent = tarifaSocial ? "tarifa fixa" : `${volumeFaturado} m³`;
+    atualizarMemoria({ tarifaSocial, volumeFaturado, economias, tabela, tarifaResidencial, agua, esgoto, recursosHidricos, total });
 
     if (rolarResultado && window.matchMedia("(max-width: 700px)").matches) {
         document.getElementById("resultado").scrollIntoView({ behavior: "smooth", block: "start" });
     }
+}
+
+function aplicarTema(tema) {
+    const noturno = tema === "dark";
+    document.documentElement.dataset.theme = noturno ? "dark" : "light";
+    const botao = document.getElementById("temaButton");
+    botao.setAttribute("aria-pressed", String(noturno));
+    botao.setAttribute("aria-label", noturno ? "Ativar modo claro" : "Ativar modo noturno");
+    botao.innerHTML = `<span aria-hidden="true">${noturno ? "☀" : "☾"}</span> ${noturno ? "Modo claro" : "Modo noturno"}`;
+}
+
+function inicializarTema() {
+    const salvo = localStorage.getItem("simula-agua-tema");
+    const preferencia = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    aplicarTema(salvo || preferencia);
+    document.getElementById("temaButton").addEventListener("click", () => {
+        const temaAtual = document.documentElement.dataset.theme;
+        const proximo = temaAtual === "dark" ? "light" : "dark";
+        localStorage.setItem("simula-agua-tema", proximo);
+        aplicarTema(proximo);
+    });
 }
 
 document.getElementById("categoria").addEventListener("change", () => { atualizarCampoTarifa(); simular(); });
@@ -365,8 +440,24 @@ document.getElementById("tarifaResidencial").addEventListener("change", simular)
 document.getElementById("consumo").addEventListener("change", simular);
 document.getElementById("economias").addEventListener("change", simular);
 document.getElementById("esgoto").addEventListener("change", simular);
-document.getElementById("calcularButton").addEventListener("click", () => simular({ rolarResultado: true }));
+document.getElementById("simulacaoForm").addEventListener("submit", event => {
+    event.preventDefault();
+    simular({ rolarResultado: true });
+});
+document.getElementById("limparButton").addEventListener("click", () => {
+    document.getElementById("consumo").value = "15";
+    document.getElementById("economias").value = "1";
+    document.getElementById("esgoto").checked = true;
+    document.getElementById("municipio").value = "";
+    document.getElementById("buscaBairro").value = "";
+    document.getElementById("resultadoBairro").textContent = "Digite pelo menos 2 caracteres para pesquisar.";
+    areaForcadaPeloBairro = null;
+    simular();
+});
 document.getElementById("buscaBairro").addEventListener("input", pesquisarBairro);
+document.getElementById("imprimirButton").addEventListener("click", () => window.print());
 preencherMunicipios();
+inicializarTema();
 atualizarCampoTarifa();
+document.getElementById("notaBaseBairros").textContent = STATUS_BASE;
 simular();
