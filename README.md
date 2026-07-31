@@ -74,11 +74,21 @@ simula-agua/
 ├── index.html
 ├── style.css
 ├── app.js
+├── js/
+│   └── configuracao.js
+├── dados/
+│   └── README.md
 ├── METODOLOGIA.md
 ├── RELATORIO_ALTERACOES.md
+├── RELATORIO_REESTRUTURACAO.md
 ├── simulador.png
 └── README.md
 ```
+
+`configuracao.js` concentra as premissas alteráveis do simulador. A pasta
+`dados/` documenta o formato planejado para separar tarifas e localidades do
+código de cálculo. Nesta etapa, as tabelas legadas ainda permanecem em
+`app.js` para preservar o funcionamento atual.
 
 ## Organização visual
 

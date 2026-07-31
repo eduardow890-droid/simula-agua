@@ -53,15 +53,19 @@ const TABELAS = {
 };
 
 // Premissas do simulador; confirme estes percentuais na regra aplicável antes de uso real.
-const PERCENTUAL_ESGOTO = 1;
+const CONFIG = window.SIMULADOR_CONFIG;
+const PERCENTUAL_ESGOTO = CONFIG.percentualEsgoto;
 // Ajuste este valor quando o percentual oficial de recursos hídricos for confirmado.
-const PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO = {
+const PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO = CONFIG.percentualRecursosHidricosPorRegiao;
+/*
     // Limite mÃ¡ximo legal usado como premissa da simulaÃ§Ã£o.
     REGIAO_1: 0.02,
     REGIAO_4: 0.02
 };
+*/
 
-const METADADOS_BASE = {
+const METADADOS_BASE = CONFIG.metadados;
+/*
     vigenciaTarifas: "dezembro de 2025",
     fonteConcessao: "Águas do Rio — página oficial de Legislação e Tarifas",
     urlFonteTarifas: "https://aguasdorio.com.br/legislacao-e-tarifas/",
@@ -72,6 +76,7 @@ const METADADOS_BASE = {
     fonteRecursosHidricos: "Lei Estadual n° 4.247/2003, art. 24, §4º"
 };
 
+*/
 const STATUS_BASE = "Base de localidades parcial; confirme o município e o bairro antes de usar a simulação.";
 
 const BAIRROS_POR_AREA = {
