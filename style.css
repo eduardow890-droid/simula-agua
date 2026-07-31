@@ -34,6 +34,10 @@ body {
     --shadow-card: 0 18px 45px rgba(0, 0, 0, .22);
 }
 :root[data-theme="dark"] input, :root[data-theme="dark"] select { background: #172235; }
+:root[data-theme="dark"] body { background: radial-gradient(circle at top left, #1e3a4a, transparent 38%), var(--background); }
+:root[data-theme="dark"] h1 { color: #e2e8f0; }
+:root[data-theme="dark"] .subtitle { color: #cbd5e1; }
+:root[data-theme="dark"] .brand-mark { background: #172f42; }
 .page-header { display: flex; align-items: center; gap: 16px; margin-bottom: 28px; }
 .brand-mark, .section-icon { display: grid; place-items: center; flex: 0 0 auto; }
 .brand-mark { width: 58px; height: 58px; border-radius: 18px; font-size: 28px; background: #d7f4fa; }
