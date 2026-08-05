@@ -1,5 +1,5 @@
 /* Tarifas informadas pelo usuário: Regiões 1 e 4, a partir de dezembro de 2025. */
-const TABELAS = {
+let TABELAS = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.tabelas) ? window.CONCESSAO_ATUAL.tabelas : {
     REGIAO_1: {
         tarifaSocial: 30.12,
         areas: {
@@ -64,7 +64,7 @@ const PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO = CONFIG.percentualRecursosHidrico
 };
 */
 
-const METADADOS_BASE = CONFIG.metadados;
+let METADADOS_BASE = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.metadadosBase) ? window.CONCESSAO_ATUAL.metadadosBase : CONFIG.metadados;
 /*
     vigenciaTarifas: "dezembro de 2025",
     fonteConcessao: "Águas do Rio — página oficial de Legislação e Tarifas",
@@ -77,9 +77,9 @@ const METADADOS_BASE = CONFIG.metadados;
 };
 
 */
-const STATUS_BASE = "Base de localidades parcial; confirme o município e o bairro antes de usar a simulação.";
+let STATUS_BASE = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.statusBase) ? window.CONCESSAO_ATUAL.statusBase : "Base de localidades parcial; confirme o município e o bairro antes de usar a simulação.";
 
-const BAIRROS_POR_AREA = {
+let BAIRROS_POR_AREA = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.bairrosPorArea) ? window.CONCESSAO_ATUAL.bairrosPorArea : {
     AREA_A: [
         "Botafogo", "Lapa", "Coelho Neto", "Praça Seca", "Catete", "Mangueira", "Cordovil", "Ramos",
         "Copacabana", "Paquetá", "Del Castilho", "Riachuelo", "Cosme Velho", "Rio Comprido", "Encantado", "Rocha",
@@ -108,12 +108,12 @@ function normalizarTexto(texto) {
     return texto.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().trim();
 }
 
-const BAIRROS = Object.entries(BAIRROS_POR_AREA).flatMap(([area, nomes]) =>
+let BAIRROS = Object.entries(BAIRROS_POR_AREA).flatMap(([area, nomes]) =>
     nomes.map(nome => ({ nome, area }))
 );
 
 // Regiões da Águas do Rio. Esta classificação é independente de AREA_A/AREA_B.
-const MUNICIPIOS_POR_REGIAO = {
+let MUNICIPIOS_POR_REGIAO = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.municipiosPorRegiao) ? window.CONCESSAO_ATUAL.municipiosPorRegiao : {
     REGIAO_1: {
         nome: "Águas do Rio - B1",
         municipios: [
@@ -134,7 +134,7 @@ const MUNICIPIOS_POR_REGIAO = {
     }
 };
 
-const MUNICIPIOS = Object.entries(MUNICIPIOS_POR_REGIAO).flatMap(
+let MUNICIPIOS = Object.entries(MUNICIPIOS_POR_REGIAO).flatMap(
     ([regiao, dados]) => dados.municipios.map(nome => ({
         nome,
         regiao,
@@ -142,10 +142,10 @@ const MUNICIPIOS = Object.entries(MUNICIPIOS_POR_REGIAO).flatMap(
     }))
 );
 
-const NOMES_MUNICIPIOS = new Set(MUNICIPIOS.map(item => normalizarTexto(item.nome)));
+let NOMES_MUNICIPIOS = new Set(MUNICIPIOS.map(item => normalizarTexto(item.nome)));
 
 // Bairros cariocas oficiais da concessão (fonte: CEDAE/AGENERSA).
-const BAIRROS_OFICIAIS = [
+let BAIRROS_OFICIAIS = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.bairrosOficiais) ? window.CONCESSAO_ATUAL.bairrosOficiais : [
     "Abolição", "Acari", "Água Santa", "Alto da Boa Vista", "Anchieta",
     "Andaraí", "Barros Filho", "Bancários", "Benfica", "Bento Ribeiro",
     "Bonsucesso", "Botafogo", "Brás de Pina", "Cachambi", "Cacuia", "Caju",
@@ -178,21 +178,23 @@ const BAIRROS_B1 = new Set([
     "Leblon", "Leme", "Rocinha", "São Conrado", "Urca", "Vidigal"
 ].map(normalizarTexto));
 
-const AREA_TARIFARIA_POR_LOCALIDADE = new Map(
+let AREA_TARIFARIA_POR_LOCALIDADE = new Map(
     BAIRROS.map(item => [normalizarTexto(item.nome), item.area])
 );
 
-const BAIRROS_CONCESSAO = BAIRROS_OFICIAIS.map(nome => ({
+let BAIRROS_CONCESSAO = BAIRROS_OFICIAIS.map(nome => ({
     nome,
     bloco: BAIRROS_B1.has(normalizarTexto(nome)) ? "B1" : "B4",
     areaTarifaria: AREA_TARIFARIA_POR_LOCALIDADE.get(normalizarTexto(nome)) || null
 }));
 
-const BAIRROS_CONSULTA = BAIRROS_CONCESSAO;
+let BAIRROS_CONSULTA = BAIRROS_CONCESSAO;
 let areaForcadaPeloBairro = null;
 
 function preencherMunicipios() {
     const select = document.getElementById("municipio");
+    // limpar opções antes de popular
+    select.innerHTML = "<option value=''>Selecione o município ou localidade</option>";
 
     Object.entries(MUNICIPIOS_POR_REGIAO).forEach(([regiao, dados]) => {
         const grupo = document.createElement("optgroup");
@@ -209,6 +211,122 @@ function preencherMunicipios() {
 
         select.appendChild(grupo);
     });
+}
+
+function loadConcessao(concessao) {
+    const c = concessao || window.CONCESSAO_ATUAL;
+    if (!c) return;
+    // substituir fontes de dados
+    TABELAS = c.tabelas || TABELAS;
+    METADADOS_BASE = c.metadadosBase || METADADOS_BASE;
+    STATUS_BASE = c.statusBase || STATUS_BASE;
+    BAIRROS_POR_AREA = c.bairrosPorArea || {};
+    MUNICIPIOS_POR_REGIAO = c.municipiosPorRegiao || {};
+    BAIRROS_OFICIAIS = c.bairrosOficiais || [];
+
+    // recalcular estruturas derivadas
+    BAIRROS = Object.entries(BAIRROS_POR_AREA).flatMap(([area, nomes]) => nomes.map(nome => ({ nome, area })));
+    MUNICIPIOS = Object.entries(MUNICIPIOS_POR_REGIAO).flatMap(([regiao, dados]) => dados.municipios.map(nome => ({ nome, regiao, nomeRegiao: dados.nome })));
+    NOMES_MUNICIPIOS = new Set(MUNICIPIOS.map(item => normalizarTexto(item.nome)));
+    AREA_TARIFARIA_POR_LOCALIDADE = new Map(BAIRROS.map(item => [normalizarTexto(item.nome), item.area]));
+    BAIRROS_CONCESSAO = BAIRROS_OFICIAIS.map(nome => ({
+        nome,
+        bloco: BAIRROS_B1.has(normalizarTexto(nome)) ? "B1" : "B4",
+        areaTarifaria: AREA_TARIFARIA_POR_LOCALIDADE.get(normalizarTexto(nome)) || null
+    }));
+    BAIRROS_CONSULTA = BAIRROS_CONCESSAO;
+    areaForcadaPeloBairro = null;
+
+    popularCategorias();
+    atualizarUIConcessao();
+}
+
+function popularConcessaoSelector() {
+    const sel = document.getElementById('concessaoSelector');
+    if (!sel || !window.CONCESSOES) return;
+    sel.innerHTML = '';
+    Object.entries(window.CONCESSOES).forEach(([id, c]) => {
+        const opt = document.createElement('option');
+        opt.value = id;
+        opt.textContent = c.nome || id;
+        sel.appendChild(opt);
+    });
+    // selecionar atual ou primeira
+    const first = Object.keys(window.CONCESSOES)[0];
+    sel.value = (window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.id) ? window.CONCESSAO_ATUAL.id : first;
+    sel.addEventListener('change', e => {
+        const id = e.target.value;
+        window.CONCESSAO_ATUAL = window.CONCESSOES[id];
+        loadConcessao(window.CONCESSAO_ATUAL);
+        preencherMunicipios();
+        sincronizarLocalidade();
+        simular();
+    });
+}
+
+function atualizarUIConcessao() {
+    const ui = window.CONCESSAO_ATUAL?.ui || {};
+    const regiaoField = document.getElementById('regiaoField');
+    const areaField = document.getElementById('areaField');
+    const bairroCard = document.getElementById('bairroCard');
+    const tarifaResidencialField = document.getElementById('tarifaResidencialField');
+    const buscaBairro = document.getElementById('buscaBairro');
+    const resultadoBairro = document.getElementById('resultadoBairro');
+
+    if (regiaoField) {
+        regiaoField.hidden = ui.showRegiao === false;
+    }
+    if (areaField) {
+        areaField.hidden = ui.showArea === false;
+    }
+    if (bairroCard) {
+        bairroCard.hidden = ui.showMunicipio === false;
+    }
+    if (tarifaResidencialField) {
+        tarifaResidencialField.hidden = ui.showTarifaResidencial === false;
+    }
+    if (buscaBairro) {
+        buscaBairro.hidden = ui.showBuscaBairro === false;
+    }
+    if (resultadoBairro) {
+        resultadoBairro.hidden = ui.showBuscaBairro === false;
+    }
+
+    const areaNota = document.getElementById('areaNota');
+    if (areaNota) {
+        areaNota.hidden = ui.showArea === false;
+    }
+
+    const notaBaseBairros = document.getElementById('notaBaseBairros');
+    if (notaBaseBairros) {
+        notaBaseBairros.textContent = STATUS_BASE;
+    }
+}
+
+function popularCategorias() {
+    const select = document.getElementById('categoria');
+    if (!select) return;
+    const categorias = window.CONCESSAO_ATUAL?.categorias;
+    if (!categorias) return;
+
+    select.innerHTML = '';
+    Object.entries(categorias).forEach(([value, label]) => {
+        const option = document.createElement('option');
+        option.value = value;
+        option.textContent = label;
+        select.appendChild(option);
+    });
+}
+
+function getTabelaCategoria(categoria, regiao, area) {
+    if (TABELAS.default && TABELAS.default[categoria]) {
+        return TABELAS.default[categoria];
+    }
+    if (TABELAS[categoria]) {
+        return TABELAS[categoria];
+    }
+    const regiaoTabela = TABELAS[regiao];
+    return regiaoTabela?.areas?.[area]?.[categoria];
 }
 
 function pesquisarBairro() {
@@ -233,7 +351,7 @@ function pesquisarBairro() {
     resultado.innerHTML = encontrados.slice(0, 10).map(item => `
         <div class="bairro-item">
             <strong>${item.nome}</strong>
-            <span>Bloco da concessão: <b>Águas do Rio - ${item.bloco}</b></span>
+            <span>Bloco da concessão: <b>${(window.CONCESSAO_ATUAL && window.CONCESSAO_ATUAL.nome) ? window.CONCESSAO_ATUAL.nome + ' - ' + item.bloco : 'Águas do Rio - ' + item.bloco}</b></span>
             <span>Área tarifária: <b>${item.areaTarifaria ? (item.areaTarifaria === "AREA_A" ? "Área A" : "Área B") : "não informada"}</b></span>
             <button type="button" onclick="selecionarBairro('${item.nome.replace(/'/g, "\\'")}')">
                 Usar este bairro
@@ -282,11 +400,29 @@ function calcularPorFaixas(volume, economias, faixas) {
     for (const faixa of faixas) {
         const limite = faixa.ate * economias;
         const volumeNaFaixa = Math.max(0, Math.min(volume, limite) - inicioFaixa);
-        total += volumeNaFaixa * faixa.valor;
+        const valor = faixa.valor ?? (faixa.agua + faixa.esgoto);
+        total += volumeNaFaixa * valor;
         inicioFaixa = limite;
         if (volume <= limite) break;
     }
     return total;
+}
+
+function calcularPorFaixasSeparado(volume, economias, faixas) {
+    let totalAgua = 0;
+    let totalEsgoto = 0;
+    let inicioFaixa = 0;
+    for (const faixa of faixas) {
+        const limite = faixa.ate * economias;
+        const volumeNaFaixa = Math.max(0, Math.min(volume, limite) - inicioFaixa);
+        if (volumeNaFaixa > 0) {
+            totalAgua += volumeNaFaixa * (faixa.valor ?? faixa.agua ?? 0);
+            totalEsgoto += volumeNaFaixa * (faixa.esgoto ?? 0);
+        }
+        inicioFaixa = limite;
+        if (volume <= limite) break;
+    }
+    return { agua: totalAgua, esgoto: totalEsgoto };
 }
 
 function detalharFaixas(volume, economias, faixas) {
@@ -295,8 +431,9 @@ function detalharFaixas(volume, economias, faixas) {
         const limite = faixa.ate * economias;
         const volumeNaFaixa = Math.max(0, Math.min(volume, limite) - inicioFaixa);
         if (volumeNaFaixa > 0) {
-            const subtotal = volumeNaFaixa * faixa.valor;
-            linhas.push(`${volumeNaFaixa.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} m³ × ${formatarMoeda(faixa.valor)} = ${formatarMoeda(subtotal)}`);
+            const valor = faixa.valor ?? (faixa.agua + faixa.esgoto);
+            const subtotal = volumeNaFaixa * valor;
+            linhas.push(`${volumeNaFaixa.toLocaleString("pt-BR", { maximumFractionDigits: 2 })} m³ × ${formatarMoeda(valor)} = ${formatarMoeda(subtotal)}`);
         }
         inicioFaixa = limite;
         return linhas;
@@ -322,8 +459,13 @@ function atualizarMemoria({ tarifaSocial, volumeFaturado, economias, tabela, tar
 }
 
 function atualizarCampoTarifa() {
-    const visivel = document.getElementById("categoria").value === "residencial";
-    document.getElementById("tarifaResidencialField").hidden = !visivel;
+    const tarifaResidencialField = document.getElementById("tarifaResidencialField");
+    const ui = window.CONCESSAO_ATUAL?.ui || {};
+    const categoriaResidencial = document.getElementById("categoria").value === "residencial";
+    const visivel = ui.showTarifaResidencial !== false && categoriaResidencial;
+    if (tarifaResidencialField) {
+        tarifaResidencialField.hidden = !visivel;
+    }
 }
 
 function sincronizarLocalidade() {
@@ -354,10 +496,10 @@ function simular({ rolarResultado = false } = {}) {
     sincronizarLocalidade();
     mostrarErro();
 
-    const regiao = document.getElementById("regiao").value;
-    const area = document.getElementById("area").value;
+    const regiao = document.getElementById("regiao")?.value;
+    const area = document.getElementById("area")?.value;
     const categoria = document.getElementById("categoria").value;
-    const tarifaResidencial = document.getElementById("tarifaResidencial").value;
+    const tarifaResidencial = document.getElementById("tarifaResidencial")?.value;
     const consumo = Number(document.getElementById("consumo").value);
     const economias = Number(document.getElementById("economias").value);
     const possuiEsgoto = document.getElementById("esgoto").checked;
@@ -367,29 +509,40 @@ function simular({ rolarResultado = false } = {}) {
         return;
     }
 
-    const regiaoTabela = TABELAS[regiao];
-    const tabela = regiaoTabela?.areas?.[area]?.[categoria];
+    const tabela = getTabelaCategoria(categoria, regiao, area);
 
     if (!tabela) {
         alert("Não foi possível encontrar a tarifa para os dados selecionados.");
         return;
     }
 
-    const consumoMinimo = tabela.minimo * economias;
+    const consumoMinimo = (tabela.minimo || 0) * economias;
     const volumeFaturado = Math.max(consumo, consumoMinimo);
-    const tarifaSocial = categoria === "residencial" && tarifaResidencial === "social";
+    const tarifaSocial = categoria === "residencial" && tarifaResidencial === "social" && tabela.tarifas;
 
-    if (categoria === "residencial" && tarifaResidencial === "tarifa1" && volumeFaturado > 15 * economias) {
+    if (tarifaSocial && volumeFaturado > 15 * economias) {
         alert("A tabela informada não apresenta a faixa da Tarifa 1 acima de 15 m³ por economia.");
         return;
     }
 
-    const agua = tarifaSocial
-        ? regiaoTabela.tarifaSocial * economias
-        : calcularPorFaixas(volumeFaturado, economias, categoria === "residencial" ? tabela.tarifas[tarifaResidencial] : tabela.faixas);
-    const esgoto = possuiEsgoto ? agua * PERCENTUAL_ESGOTO : 0;
-    const percentualRecursosHidricos = PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO[regiao] || 0;
-    const recursosHidricos = tarifaSocial ? 0 : (agua + esgoto) * percentualRecursosHidricos;
+    let agua = 0;
+    let esgoto = 0;
+    let recursosHidricos = 0;
+    const percentualRecursosHidricos = window.CONCESSAO_ATUAL?.percentualRecursosHidricos ?? (PERCENTUAL_RECURSOS_HIDRICOS_POR_REGIAO[regiao] || 0);
+
+    if (tabela.faixas) {
+        const totais = calcularPorFaixasSeparado(volumeFaturado, economias, tabela.faixas);
+        agua = totais.agua;
+        esgoto = possuiEsgoto ? totais.esgoto : 0;
+    } else if (tarifaSocial) {
+        agua = (tabela.tarifas?.[tarifaResidencial] || []).reduce((sum, faixa) => sum + (faixa.agua ?? faixa.valor ?? 0), 0) * economias;
+        esgoto = possuiEsgoto ? agua * PERCENTUAL_ESGOTO : 0;
+    } else {
+        agua = calcularPorFaixas(volumeFaturado, economias, tabela.tarifas?.[tarifaResidencial] || tabela.faixas);
+        esgoto = possuiEsgoto ? agua * PERCENTUAL_ESGOTO : 0;
+    }
+
+    recursosHidricos = tarifaSocial ? 0 : (agua + esgoto) * percentualRecursosHidricos;
     const total = agua + esgoto + recursosHidricos;
 
     document.getElementById("agua").textContent = formatarMoeda(agua);
@@ -461,6 +614,10 @@ document.getElementById("limparButton").addEventListener("click", () => {
 });
 document.getElementById("buscaBairro").addEventListener("input", pesquisarBairro);
 document.getElementById("imprimirButton").addEventListener("click", () => window.print());
+// popular seletor de concessionárias (se houver) e carregar dados
+popularConcessaoSelector();
+// aplicar concessionária atual (definida por js/concessoes/*) se existir
+loadConcessao(window.CONCESSAO_ATUAL || (window.CONCESSOES ? window.CONCESSOES[Object.keys(window.CONCESSOES)[0]] : null));
 preencherMunicipios();
 inicializarTema();
 atualizarCampoTarifa();

@@ -25,12 +25,16 @@
             <h1>Simulador de Consumo de Água</h1>
             <p class="subtitle">Faça uma estimativa de água, esgoto e recursos hídricos.</p>
         </div>
-        <button id="temaButton" class="tema-button" type="button" aria-label="Ativar modo noturno" aria-pressed="false">
-            <span aria-hidden="true">&#9790;</span> Modo noturno
-        </button>
+        <div style="display:flex;gap:10px;align-items:center;">
+            <label for="concessaoSelector" style="font-weight:700; font-size:0.85rem; margin-right:6px;">Concessionária</label>
+            <select id="concessaoSelector" aria-label="Selecionar concessionária"></select>
+            <button id="temaButton" class="tema-button" type="button" aria-label="Ativar modo noturno" aria-pressed="false">
+                <span aria-hidden="true">&#9790;</span> Modo noturno
+            </button>
+        </div>
     </header>
 
-    <section class="card bairro-card" aria-labelledby="bairroTitulo">
+    <section id="bairroCard" class="card bairro-card" aria-labelledby="bairroTitulo">
         <div class="section-heading">
             <span class="section-icon">⌕</span>
             <div>
@@ -58,17 +62,21 @@
                 <div><h2>Dados do imóvel</h2><p>Informe os dados para realizar a simulação.</p></div>
             </div>
 
-            <label for="regiao">Região tarifária</label>
-            <select id="regiao">
-                <option value="REGIAO_1">Região 1 — a partir de dezembro de 2025</option>
-                <option value="REGIAO_4">Região 4 — a partir de dezembro de 2025</option>
-            </select>
+            <div id="regiaoField">
+                <label for="regiao">Região tarifária</label>
+                <select id="regiao">
+                    <option value="REGIAO_1">Região 1 — a partir de dezembro de 2025</option>
+                    <option value="REGIAO_4">Região 4 — a partir de dezembro de 2025</option>
+                </select>
+            </div>
 
-            <label for="area">Área tarifária</label>
-            <select id="area">
-                <option value="AREA_A">Área A</option>
-                <option value="AREA_B">Área B</option>
-            </select>
+            <div id="areaField">
+                <label for="area">Área tarifária</label>
+                <select id="area">
+                    <option value="AREA_A">Área A</option>
+                    <option value="AREA_B">Área B</option>
+                </select>
+            </div>
             <p id="areaNota" class="field-note">Selecione um município para definir automaticamente a área.</p>
 
             <label for="categoria">Categoria</label>
@@ -151,6 +159,8 @@
     </aside>
 </main>
 <script src="js/configuracao.js"></script>
+<script src="js/concessoes/aguas-do-rio.js"></script>
+<script src="js/concessoes/zona-oeste-mais.js"></script>
 <script src="app.js"></script>
 </body>
 </html>
